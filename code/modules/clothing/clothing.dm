@@ -1470,6 +1470,4 @@
 	if(istype(user) && user.dna && ("[blood_state]blood" in user.dna.species.get_blood_overlays()))
 		blood_mask = user.dna.species.blood_mask
 
-	var/mutable_appearance/blood_overlay = mutable_appearance(blood_mask, "[blood_state]blood")
-	blood_overlay.color = blood_color
-	return blood_overlay
+	return mutable_appearance(blood_mask, "[blood_state]blood", color = blood_color)

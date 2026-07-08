@@ -65,9 +65,7 @@
 	if(length(reagents.reagent_list))
 		var/datum/reagent/check = reagents.get_master_reagent()
 		if(!check.drink_icon)
-			var/mutable_appearance/glass_overlay = mutable_appearance(icon, "glassoverlay")
-			glass_overlay.color = get_color_matrix_from_reagents(reagents.reagent_list)
-			. += glass_overlay
+			. += mutable_appearance(icon, "glassoverlay", color = get_color_matrix_from_reagents(reagents.reagent_list))
 	else
 		icon_state = initial(icon_state)
 

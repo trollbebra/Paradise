@@ -15,6 +15,7 @@
 	anchored = TRUE
 	w_class = WEIGHT_CLASS_BULKY
 	canhear_range = 2
+	blocks_emissive = FALSE
 	dog_fashion = null
 	var/circuitry_installed = TRUE
 	/// Current buildstage of the object
@@ -42,7 +43,7 @@
 		b_stat = TRUE
 		set_on(FALSE)
 	GLOB.global_intercoms |= src
-	update_appearance()
+	update_icon()
 
 /obj/item/radio/intercom/Destroy()
 	GLOB.global_intercoms -= src
@@ -141,9 +142,9 @@
 	b_stat = FALSE
 	buildstage = INTERCOM_BUILD_SECURED
 	user.balloon_alert(user, "корпус заблокирован")
-	update_appearance()
+	update_icon()
 	update_operating_status()
-	for(var/i in 1 to 5)
+	for(var/i = 1 to 5)
 		wires.on_cut(i, TRUE)
 
 /obj/item/radio/intercom/wirecutter_act(mob/user, obj/item/I)
@@ -157,7 +158,7 @@
 	set_on(FALSE)
 	b_stat = TRUE
 	buildstage = INTERCOM_BUILD_CIRCUIT
-	update_appearance()
+	update_icon()
 	update_operating_status(FALSE)
 
 /obj/item/radio/intercom/welder_act(mob/user, obj/item/I)
@@ -181,9 +182,9 @@
 
 /obj/item/radio/intercom/update_overlays()
 	. = ..()
+	underlays.Cut()
 	if(on && buildstage == INTERCOM_BUILD_SECURED)
-		. += emissive_appearance(icon, "intercom_lightmask", src, alpha = src.alpha)
-		set_light(1.5, 0.7, LIGHT_COLOR_BLUEGREEN)
+		underlays += emissive_appearance(icon, "intercom_lightmask", src)
 
 /obj/item/radio/intercom/proc/update_operating_status(on = TRUE)
 	var/area/current_area = get_area(src)
@@ -195,7 +196,7 @@
 		UnregisterSignal(current_area, COMSIG_AREA_POWER_CHANGE)
 
 /**
- * Proc called whenever the intercom's area loses or gains power. Responsible for setting the `on` variable and calling `update_appearance()`.
+ * Proc called whenever the intercom's area loses or gains power. Responsible for setting the `on` variable and calling `update_icon()`.
  *
  * Normally called after the intercom's area receives the `COMSIG_AREA_POWER_CHANGE` signal, but it can also be called directly.
  *
@@ -210,7 +211,7 @@
 		set_on(FALSE)
 	else
 		set_on(current_area.powered(EQUIP)) // set "on" to the equipment power status of our area.
-	update_appearance()
+	update_icon()
 
 // MARK: Custom
 /obj/item/radio/intercom/custom

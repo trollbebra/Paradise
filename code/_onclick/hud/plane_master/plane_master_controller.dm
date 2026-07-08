@@ -1,24 +1,20 @@
-/// Atom that manages and controls multiple planes. It's an atom so we can hook into add_filter etc. Multiple controllers can control one plane.
-/// Of note: plane master controllers are currently not very extensively used, because render plates fill a semi similar niche
-/// This could well change someday, and I'd like to keep this stuff around, so we use it for a few cases just out of convenience
+///Atom that manages and controls multiple planes. It's an atom so we can hook into add_filter etc. Multiple controllers can control one plane.
+///Of note: plane master controllers are currently not very extensively used, because render plates fill a semi similar niche
+///This could well change someday, and I'd like to keep this stuff around, so we use it for a few cases just out of convenience
 /atom/movable/plane_master_controller
 	///List of planes as defines in this controllers control
 	var/list/controlled_planes = list()
 	///hud that owns this controller
 	var/datum/hud/owner_hud
 
-INITIALIZE_IMMEDIATE(/atom/movable/plane_master_controller)
-
 ///Ensures that all the planes are correctly in the controlled_planes list.
-/atom/movable/plane_master_controller/Initialize(mapload, datum/hud/hud)
+/atom/movable/plane_master_controller/New(hud)
 	. = ..()
-	if(!istype(hud))
-		return
 	owner_hud = hud
 
 /atom/movable/plane_master_controller/Destroy(force)
 	owner_hud = null
-	return ..()
+	. = ..()
 
 /atom/movable/plane_master_controller/proc/get_planes()
 	var/returned_planes = list()
@@ -61,7 +57,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/plane_master_controller)
 /atom/movable/plane_master_controller/transition_filter(name, time, list/new_params, easing, loop)
 	. = ..()
 	for(var/atom/movable/screen/plane_master/pm_iterator as anything in get_planes())
-		pm_iterator.transition_filter(name, new_params, time, easing, loop)
+		pm_iterator.transition_filter(name, time, new_params, easing, loop)
 
 ///Full override so we can just use filterrific
 /atom/movable/plane_master_controller/add_atom_colour(coloration, colour_priority)
@@ -95,11 +91,3 @@ INITIALIZE_IMMEDIATE(/atom/movable/plane_master_controller)
 		RENDER_PLANE_GAME,
 		RENDER_PLANE_NON_GAME,
 	)
-
-/// Exists for convienience when referencing all game render plates
-/atom/movable/plane_master_controller/colorblind
-	name = PLANE_MASTERS_COLORBLIND
-	controlled_planes = list(
-		RENDER_PLANE_MASTER,
-	)
-

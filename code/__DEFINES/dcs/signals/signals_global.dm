@@ -51,6 +51,3 @@
 
 ///Global signal sent when the player list shrinks. Called by [mob/remove_from_player_list] (mob/player)
 #define COMSIG_GLOB_PLAYER_LOGOUT "!player_logout"
-
-/// Global signal when starlight color is changed (old_star, new_star)
-#define COMSIG_STARLIGHT_COLOR_CHANGED "!starlight_color_changed"

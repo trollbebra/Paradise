@@ -187,7 +187,6 @@
 		if(has_buckled_mobs())
 			unbuckle_all_mobs(force = TRUE)
 */
-	refresh_gravity()
 	. = ..()
 	if(. && client)
 		reset_perspective()

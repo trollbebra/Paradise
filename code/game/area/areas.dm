@@ -139,12 +139,9 @@
 	var/base_lighting_color = COLOR_WHITE
 	///Whether this area allows static lighting and thus loads the lighting objects
 	var/static_lighting = TRUE
+	///Whether this area is iluminated by starlight
+	var/use_starlight = FALSE
 
-/**
- * Called when an area loads
- *
- *  Adds the item to the GLOB.areas_by_type list based on area type
- */
 /area/New(loc, ...)
 	// This interacts with the map loader, so it needs to be set immediately
 	// rather than waiting for atoms to initialize.
@@ -153,14 +150,6 @@
 	GLOB.areas += src
 	return ..()
 
-/*
- * Initialize this area
- *
- * initializes the dynamic area lighting and also registers the area with the z level via
- * reg_in_areas_in_z
- *
- * returns INITIALIZE_HINT_LATELOAD
- */
 /area/Initialize(mapload)
 	if(!ambientsounds)
 		ambientsounds = GLOB.ambience_assoc[ambience_index]
@@ -174,15 +163,16 @@
 
 	map_name = name // Save the initial (the name set in the map) name of the area.
 
-	if(requires_power)
-		luminosity = 0
-	else
+	if(use_starlight && CONFIG_GET(flag/starlight))
+		// Areas lit by starlight are not supposed to be fullbright 4head
+		base_lighting_alpha = 0
+		base_lighting_color = null
+		static_lighting = TRUE
+
+	if(!requires_power)
 		power_light = TRUE
 		power_equip = TRUE
 		power_environ = TRUE
-
-		if(static_lighting)
-			luminosity = 0
 
 	. = ..()
 
@@ -368,23 +358,10 @@
 /area/Destroy()
 	if(GLOB.areas_by_type[type] == src)
 		GLOB.areas_by_type[type] = null
-	//this is not initialized until get_sorted_areas() is called so we have to do a null check
-	if(!isnull(GLOB.sortedAreas))
-		GLOB.sortedAreas -= src
-	//just for sanity sake cause why not
-	if(!isnull(GLOB.areas))
-		GLOB.areas -= src
-	//machinery cleanup
-	STOP_PROCESSING(SSobj, src)
-	firedoors = null
-	//atmos cleanup
-	firealarms = null
-	air_vents = null
-	air_scrubs = null
-	//turf cleanup
+	GLOB.areas -= src
 	turfs_by_zlevel = null
 	turfs_to_uncontain_by_zlevel = null
-	//parent cleanup
+	STOP_PROCESSING(SSobj, src)
 	return ..()
 
 /**

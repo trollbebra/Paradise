@@ -1,5 +1,4 @@
 /obj/structure/statue
-	abstract_type = /obj/structure/statue
 	name = "statue"
 	desc = "Placeholder. Yell at Firecage if you SOMEHOW see this."
 	icon = 'icons/obj/statue.dmi'
@@ -7,7 +6,7 @@
 	density = TRUE
 	max_integrity = 100
 	cares_about_temperature = TRUE
-	blocks_emissive = EMISSIVE_BLOCK_UNIQUE
+	abstract_type = /obj/structure/statue
 	var/oreAmount = 5
 	var/material_drop_type = /obj/item/stack/sheet/metal
 

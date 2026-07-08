@@ -296,9 +296,8 @@
 // FAKESPACE
 /turf/simulated/floor/fakespace
 	icon = 'icons/turf/space.dmi'
-	icon_state = "space"
+	icon_state = "0"
 	floor_tile = /obj/item/stack/tile/fakespace
-	layer = SPACE_LAYER
 	plane = PLANE_SPACE
 
 /turf/simulated/floor/fakespace/Initialize(mapload)
@@ -309,7 +308,9 @@
 	return list("damaged")
 
 /turf/simulated/floor/fakespace/get_smooth_underlay_icon(mutable_appearance/underlay_appearance, turf/asking_turf, adjacency_dir)
-	generate_space_underlay(underlay_appearance, asking_turf)
+	underlay_appearance.icon = 'icons/turf/space.dmi'
+	underlay_appearance.icon_state = SPACE_ICON_STATE
+	SET_PLANE(underlay_appearance, PLANE_SPACE, src)
 	return TRUE
 
 /turf/simulated/floor/carpet/arcade

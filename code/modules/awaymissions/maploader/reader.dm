@@ -172,16 +172,11 @@ GLOBAL_DATUM_INIT(_preloader, /datum/dmm_suite/preloader, new())
 		CRASH("Bad Map bounds in [fname], Min x: [bounds[MAP_MINX]], Min y: [bounds[MAP_MINY]], Min z: [bounds[MAP_MINZ]], Max x: [bounds[MAP_MAXX]], Max y: [bounds[MAP_MAXY]], Max z: [bounds[MAP_MAXZ]]")
 	else
 		if(!measureOnly)
-			var/list/turfs = block(
-				bounds[MAP_MINX], bounds[MAP_MINY], bounds[MAP_MINZ],
-				bounds[MAP_MAXX], bounds[MAP_MAXY], bounds[MAP_MAXZ]
-			)
-			for(var/turf/turf as anything in turfs)
+			for(var/t in block(bounds[MAP_MINX], bounds[MAP_MINY], bounds[MAP_MINZ], bounds[MAP_MAXX], bounds[MAP_MAXY], bounds[MAP_MAXZ]))
+				var/turf/T = t
 				// we do this after we load everything in. if we don't; we'll have weird atmos bugs regarding atmos adjacent turfs
-				turf.AfterChange(CHANGETURF_IGNORE_AIR|CHANGETURF_KEEP_CABLING)
+				T.AfterChange(CHANGETURF_IGNORE_AIR|CHANGETURF_KEEP_CABLING)
 				CHECK_TICK
-			// lavaland fuck this
-			//SSlighting.setup_static_lighting_if_needed(turfs)
 		return bounds
 
 /**

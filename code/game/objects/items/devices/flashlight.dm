@@ -15,17 +15,15 @@
 	slot_flags = ITEM_SLOT_BELT
 	materials = list(MAT_METAL=50, MAT_GLASS=20)
 	actions_types = list(/datum/action/item_action/toggle_light)
-	light_system = OVERLAY_LIGHT_DIRECTIONAL
-	light_color = COLOR_LIGHT_ORANGE
+	light_system = MOVABLE_LIGHT_DIRECTIONAL
 	light_range = 4
 	light_on = FALSE
+	light_color = COLOR_LIGHT_ORANGE
 	toolbox_radial_menu_compatibility = TRUE
 	/// Should the flashlight start turned on?
 	var/on = FALSE
 	/// The sound the light makes when it's turned on/off
 	var/togglesound = 'sound/weapons/empty.ogg'
-	/// When true, painting the flashlight won't change its light color
-	var/ignore_base_color = FALSE
 
 /obj/item/flashlight/get_ru_names()
 	return alist(
@@ -44,7 +42,7 @@
 
 /obj/item/flashlight/dummy
 	name = "Testing flashlight"
-	light_system = OVERLAY_LIGHT
+	light_system = MOVABLE_LIGHT
 
 /obj/item/flashlight/dummy/get_ru_names()
 	return alist(
@@ -69,7 +67,7 @@
 		icon_state = "[initial(icon_state)]"
 
 /obj/item/flashlight/proc/update_brightness()
-	if(light_system == COMPLEX_LIGHT)
+	if(light_system == STATIC_LIGHT)
 		update_light()
 	set_light_on(on)
 	update_appearance(UPDATE_ICON)
@@ -138,16 +136,6 @@
 		update_brightness()
 		update_equipped_item()
 
-/obj/item/flashlight/update_atom_colour()
-	. = ..()
-	if(ignore_base_color)
-		return
-	var/list/applied_matrix = cached_color_filter
-	if(!applied_matrix)
-		applied_matrix = color_transition_filter(color, SATURATION_OVERRIDE)
-	var/new_light_color = apply_matrix_to_color(initial(light_color), applied_matrix["color"], applied_matrix["space"] || COLORSPACE_RGB)
-	set_light_color(new_light_color)
-
 /obj/item/flashlight/pen
 	name = "penlight"
 	desc = "Небольшой фонарь в форме ручки. Используется медицинским персоналом."
@@ -157,7 +145,7 @@
 	belt_icon = "penlight"
 	w_class = WEIGHT_CLASS_TINY
 	slot_flags = ITEM_SLOT_BELT|ITEM_SLOT_EARS
-	light_system = OVERLAY_LIGHT
+	light_system = MOVABLE_LIGHT
 	light_range = 2
 
 /obj/item/flashlight/pen/get_ru_names()
@@ -238,12 +226,11 @@
 	gender = FEMALE
 	icon_state = "lamp"
 	item_state = "lamp"
-	light_range = 3.5
-	light_system = COMPLEX_LIGHT
-	light_color = LIGHT_COLOR_FAINT_BLUE
+	light_range = 5
 	w_class = WEIGHT_CLASS_BULKY
 	materials = list()
 	on = TRUE
+	light_color = COLOR_PALE_YELLOW
 
 /obj/item/flashlight/lamp/get_ru_names()
 	return alist(
@@ -260,7 +247,7 @@
 	desc = "Стационарный источник света. Классический вариант зелёного цвета."
 	icon_state = "lampgreen"
 	item_state = "lampgreen"
-	light_color = LIGHT_COLOR_TUNGSTEN
+	light_color = COLOR_LIGHT_GREEN
 
 /obj/item/flashlight/lamp/green/get_ru_names()
 	return alist(
@@ -278,7 +265,7 @@
 			банановой кожуры и дурацким шнуром включения."
 	icon_state = "bananalamp"
 	item_state = "bananalamp"
-	light_color = LIGHT_COLOR_BRIGHT_YELLOW
+	light_color = COLOR_BRIGHT_LIME
 
 /obj/item/flashlight/lamp/bananalamp/get_ru_names()
 	return alist(
@@ -299,7 +286,7 @@
 	desc = "Ручной аварийный источник света. Заполнен пиротехническим составом, который поджигается \
 			при активации, давая яркое пламя красного цвета."
 	light_range = 8
-	light_system = OVERLAY_LIGHT
+	light_system = MOVABLE_LIGHT
 	light_color = "#ff0000"
 	icon_state = "flare"
 	item_state = "flare"
@@ -315,8 +302,6 @@
 	/// Maximum amount on initialization
 	var/fuel_upp = 1000
 	var/spawn_fuel = TRUE
-	/// Lighting middleman, lets us do a flicker effect
-	var/datum/light_middleman/middleman
 
 /obj/item/flashlight/flare/get_ru_names()
 	return alist(
@@ -331,16 +316,10 @@
 /obj/item/flashlight/flare/Initialize(mapload)
 	if(spawn_fuel)
 		fuel = rand(fuel_lower, fuel_upp)
-	. = ..()
-	if(IS_OVERLAY_LIGHT_SYSTEM(light_system))
-		middleman = new(src, "flashlight")
-		RegisterSignal(middleman, COMSIG_LIGHT_MIDDLEMAN_UPDATED, PROC_REF(light_updated))
-		middleman.being_overriding_light()
+	return ..()
 
 /obj/item/flashlight/flare/Destroy()
 	STOP_PROCESSING(SSobj, src)
-	if(middleman)
-		QDEL_NULL(middleman)
 	return ..()
 
 /obj/item/flashlight/flare/update_icon_state()
@@ -374,14 +353,10 @@
 	damtype = FIRE
 
 /obj/item/flashlight/flare/proc/turn_off()
-	set_light_on(FALSE)
+	on = FALSE
 	force = initial(force)
 	damtype = initial(damtype)
 	update_brightness()
-
-/obj/item/flashlight/flare/proc/light_updated(datum/source)
-	SIGNAL_HANDLER
-	fire_flicker_middleman(middleman)
 
 /obj/item/flashlight/flare/extinguish_light(force = FALSE)
 	if(force)
@@ -454,7 +429,7 @@
 	produce_heat = 0
 	fuel_lower = 1600
 	fuel_upp = 2000
-	ignore_base_color = TRUE
+	blocks_emissive = FALSE
 	var/chemglow_sprite_type = "green"
 
 /obj/item/flashlight/flare/glowstick/get_ru_names()
@@ -468,7 +443,7 @@
 	)
 
 /obj/item/flashlight/flare/glowstick/Initialize(mapload)
-	set_light_color(color)
+	light_color = color
 	return ..()
 
 /obj/item/flashlight/flare/glowstick/update_icon_state()
@@ -477,11 +452,10 @@
 
 /obj/item/flashlight/flare/glowstick/update_overlays()
 	. = ..()
-	if(!on)
-		return
-	var/mutable_appearance/glowstick_overlay = mutable_appearance(icon, "glowstick-glow")
-	glowstick_overlay.color = color
-	. += glowstick_overlay
+	if(on)
+		var/mutable_appearance/glowstick_overlay = mutable_appearance(icon, "glowstick-glow")
+		glowstick_overlay.color = color
+		. += glowstick_overlay
 
 /obj/item/flashlight/flare/glowstick/used
 	spawn_fuel = FALSE
@@ -630,7 +604,7 @@
 	icon_state = "slime"
 	w_class = WEIGHT_CLASS_TINY
 	light_range = 6
-	light_system = OVERLAY_LIGHT
+	light_system = MOVABLE_LIGHT
 	light_color = "#FFBF00"
 	materials = list()
 	on = TRUE //Bio-luminesence has one setting, on.
@@ -712,7 +686,7 @@
 	name = "disco light"
 	desc = "Заводной..."
 	icon_state = null
-	light_system = COMPLEX_LIGHT
+	light_system = STATIC_LIGHT
 	light_power = 2
 	alpha = 0
 	layer = ABOVE_OPEN_TURF_LAYER

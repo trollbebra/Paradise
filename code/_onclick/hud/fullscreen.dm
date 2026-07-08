@@ -96,8 +96,8 @@
 /mob/proc/relayer_fullscreens()
 	var/turf/our_lad = get_turf(src)
 	var/offset = GET_TURF_PLANE_OFFSET(our_lad)
-	for(var/category, value in screens)
-		var/atom/movable/screen/fullscreen/screen = value
+	for(var/category in screens)
+		var/atom/movable/screen/fullscreen/screen = screens[category]
 		if(screen.needs_offsetting)
 			screen.plane = GET_NEW_PLANE(initial(screen.plane), offset)
 
@@ -156,32 +156,9 @@
 	icon_state = "noise"
 
 /atom/movable/screen/fullscreen/high
+	icon = 'icons/mob/screen_gen.dmi'
+	screen_loc = "WEST,SOUTH to EAST,NORTH"
 	icon_state = "druggy"
-	plane = LIGHTING_PLANE
-	layer = LIGHTING_ABOVE_ALL + 1 //Infinity plus one (not actually)
-	blend_mode = BLEND_MULTIPLY
-
-/atom/movable/screen/fullscreen/high/update_for_view(client_view)
-
-	animate(src, flags = ANIMATION_END_NOW) //Stop all animations.
-
-	. = ..()
-
-	color = COLOR_MATRIX_IDENTITY //We convert it early to avoid a sudden weird jitter.
-	alpha = 0
-
-	animate(src, alpha = 255, time = 5 SECONDS) //Fade in.
-
-	addtimer(CALLBACK(src, PROC_REF(start_hue_rotation)), 5 SECONDS)
-
-/atom/movable/screen/fullscreen/high/proc/start_hue_rotation()
-	animate(src, color = color_matrix_rotate_hue(1), loop = -1, time = 2 SECONDS) //Start the loop.
-	var/step_precision = 18 //Larger is more precise rotations.
-	for(var/current_step in 1 to (step_precision - 1)) //We do the -1 here because 360 == 0 when it comes to angles.
-		animate(
-			color = color_matrix_rotate_hue(current_step * 360 / step_precision),
-			time = 2 SECONDS,
-		)
 
 /atom/movable/screen/fullscreen/payback
 	icon_state = "payback"
@@ -196,6 +173,16 @@
 	color = "#000000"
 	show_when_dead = TRUE
 
+/atom/movable/screen/fullscreen/lighting_backdrop
+	icon = 'icons/mob/screen_gen.dmi'
+	icon_state = "flash"
+	screen_loc = "WEST,SOUTH to EAST,NORTH"
+	plane = LIGHTING_PLANE
+	layer = LIGHTING_LAYER
+	blend_mode = BLEND_OVERLAY
+	show_when_dead = TRUE
+	needs_offsetting = FALSE
+
 /atom/movable/screen/fullscreen/curse
 	icon_state = "curse"
 	layer = CURSE_LAYER
@@ -203,16 +190,6 @@
 /atom/movable/screen/fullscreen/bloody_screen
 	icon_state = "bloody_screen"
 	layer = BLOODY_SCREEN_LAYER
-
-/atom/movable/screen/fullscreen/lighting_backdrop
-	icon = 'icons/mob/screen_gen.dmi'
-	icon_state = "flash"
-	screen_loc = "WEST,SOUTH to EAST,NORTH"
-	plane = LIGHTING_PLANE
-	layer = LIGHTING_ABOVE_ALL
-	blend_mode = BLEND_OVERLAY
-	show_when_dead = TRUE
-	needs_offsetting = FALSE
 
 //Provides darkness to the back of the lighting plane
 /atom/movable/screen/fullscreen/lighting_backdrop/lit
@@ -227,7 +204,7 @@
 /atom/movable/screen/fullscreen/see_through_darkness
 	icon_state = "nightvision"
 	plane = LIGHTING_PLANE
-	layer = LIGHTING_ABOVE_ALL
+	layer = LIGHTING_LAYER
 	blend_mode = BLEND_ADD
 	show_when_dead = TRUE
 

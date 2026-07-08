@@ -1,11 +1,9 @@
 /turf/simulated/wall
 	name = "wall"
-	gender = FEMALE
-	desc = "Массивный блок металла, используемый для разделения отсеков."
+	desc = "A huge chunk of metal used to seperate rooms."
 	icon = 'icons/turf/walls/wall.dmi'
 	icon_state = "wall-0"
 	base_icon_state = "wall"
-	layer = CLOSED_TURF_LAYER
 	plane = WALL_PLANE
 	var/rotting = 0
 
@@ -54,7 +52,7 @@
 /turf/simulated/wall/BeforeChange()
 	for(var/obj/effect/overlay/wall_rot/WR in src)
 		qdel(WR)
-	return ..()
+	. = ..()
 
 /turf/simulated/wall/Initialize(mapload)
 	. = ..()

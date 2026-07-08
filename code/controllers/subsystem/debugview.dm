@@ -64,6 +64,6 @@ SUBSYSTEM_DEF(debugview)
 	icon = 'icons/mob/screen_full.dmi'
 	icon_state = "default"
 	screen_loc = "CENTER-7,CENTER-7"
-	plane = SPLASHSCREEN_PLANE
+	plane = HUD_PLANE_DEBUGVIEW
 	maptext_height = 480 // If we ever change view size, increase this
 	maptext_width = 480

@@ -310,7 +310,7 @@
 /obj/effect/temp_visual/shockwave
 	icon = 'icons/effects/light_overlays/shockwave.dmi'
 	icon_state = "shockwave"
-	plane = DISPLACEMENT_PLANE
+	plane = GRAVITY_PULSE_PLANE
 	pixel_x = -496
 	pixel_y = -496
 

@@ -964,7 +964,9 @@
 	width = 10;
 	height = 7
 	},
-/turf/space/black,
+/turf/space{
+	icon_state = "black"
+	},
 /area/space)
 "vA" = (
 /obj/effect/clockwork/overlay/floor/bloodcult,
@@ -2227,7 +2229,9 @@
 /turf/simulated/floor/carpet,
 /area/ruin/space/graveyard/church)
 "WA" = (
-/turf/space/black,
+/turf/space{
+	icon_state = "black"
+	},
 /area/space)
 "WD" = (
 /obj/effect/decal/cleanable/dust,

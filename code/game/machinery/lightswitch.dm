@@ -3,21 +3,13 @@
 	name = "light switch"
 	desc = "Выключатель для управления светом во всей комнате."
 	icon = 'icons/obj/engines_and_power/power.dmi'
-	icon_state = "light-nopower"
-	base_icon_state = "light"
-	idle_power_usage = BASE_MACHINE_IDLE_CONSUMPTION * 0.02
+	icon_state = "light1"
 	anchored = TRUE
 	mouse_over_pointer = MOUSE_HAND_POINTER
 	/// Set this to a string, path, or area instance to control that area instead of the switch's location.
 	var/area/area = null
-	/// Range of the light emitted when powered, but off
-	var/light_on_range = 1
 	/// Should this lightswitch automatically rename itself to match the area it's in?
 	var/autoname = TRUE
-	/// The sound the light makes when it's turned on
-	var/sound_on = 'sound/items/magin.ogg'
-	/// The sound the light makes when it's turned off
-	var/sound_off = 'sound/items/magout.ogg'
 
 /obj/machinery/light_switch/get_ru_names()
 	return alist(
@@ -53,39 +45,27 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/light_switch, 26, 26)
 		/obj/item/circuit_component/light_switch,
 	))
 
-	register_context()
-	update_appearance()
-
-/obj/machinery/light_switch/add_context(atom/source, list/context, obj/item/held_item, mob/user)
-	. = ..()
-	if(isnull(held_item))
-		context[SCREENTIP_CONTEXT_LMB] = area.lightswitch ? "Выключить" : "Включить"
-		return CONTEXTUAL_SCREENTIP_SET
-
-/obj/machinery/light_switch/update_appearance(updates=ALL)
-	. = ..()
-	luminosity = (stat & NOPOWER) ? 0 : 1
+	update_icon()
 
 /obj/machinery/light_switch/update_icon_state()
-	set_light(area.lightswitch ? 0 : light_on_range)
-	icon_state = "[base_icon_state]"
 	if(stat & NOPOWER)
-		icon_state += "-nopower"
+		icon_state = "light-p"
 		return
 
-	icon_state += "[area.lightswitch ? "-on" : "-off"]"
+	icon_state = "light[area.lightswitch]"
 
 /obj/machinery/light_switch/update_overlays()
 	. = ..()
+	underlays.Cut()
 
 	if(stat & NOPOWER)
 		return
 
-	. += emissive_appearance(icon, "[base_icon_state]-emissive[area.lightswitch ? "-on" : "-off"]", src, alpha = src.alpha)
+	underlays += emissive_appearance(icon, "light_lightmask", src)
 
 /obj/machinery/light_switch/examine(mob/user)
 	. = ..()
-	. += span_boldnotice("[(stat & NOPOWER) ? "Отключено" : (area.lightswitch ? "Включено" : "Выключено")].")
+	. += span_boldnotice("[area.lightswitch ? "Включено" : "Выключено"].")
 
 /obj/machinery/light_switch/attack_ghost(mob/user)
 	if(user.can_advanced_admin_interact())
@@ -93,7 +73,6 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/light_switch, 26, 26)
 
 /obj/machinery/light_switch/attack_hand(mob/user)
 	add_fingerprint(user)
-	playsound(src, area.lightswitch ? sound_off : sound_on, 40, TRUE)
 	set_lights(!area.lightswitch)
 
 /obj/machinery/light_switch/proc/set_lights(status)
@@ -101,15 +80,16 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/light_switch, 26, 26)
 		return
 
 	area.lightswitch = status
-	area.update_appearance()
+	update_icon()
+	playsound(src, 'sound/machines/lightswitch.ogg', 10, TRUE)
 
-	for(var/obj/machinery/light_switch/light_switch as anything in SSmachines.get_by_type(/obj/machinery/light_switch))
-		if(light_switch.area != area)
-			continue
-		light_switch.update_appearance()
+	area.update_icon(UPDATE_ICON_STATE)
+
+	for(var/obj/machinery/light_switch/light_switch in (area.machinery_cache - src))
+		light_switch.update_icon()
 		SEND_SIGNAL(light_switch, COMSIG_LIGHT_SWITCH_SET, status)
 
-	area.power_change()
+	area?.power_change()
 
 /obj/machinery/light_switch/power_change(forced = FALSE)
 	if(!..())

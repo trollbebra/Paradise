@@ -3,7 +3,6 @@
 	always_unpowered = TRUE
 	static_lighting = FALSE
 	base_lighting_alpha = 255
-	base_lighting_color = COLOR_STARLIGHT
 	power_light = FALSE
 	power_equip = FALSE
 	power_environ = FALSE
